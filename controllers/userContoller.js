@@ -1,17 +1,17 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { User } from "../models/userModels.js";
-import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js"
 
-export const register = asyncHandler(async (req, res, next) => {
+import { User } from "../models/userModels.js";
+import { catchAsyncErrors } from "../middlewires/catchAsyncError.js";
+import ErrorHandler from "../middlewires/error.js"
+import { sendToken } from "../utils/jwtToken.js"
+export const register = catchAsyncErrors(async (req, res, next) => {
     const { name, email, phone, password, role } = req.body;
 
     if (!name || !email || !phone || !password || !role) {
-        return new ApiError(400, "Please fill full form!");
+        return next(new ErrorHandler("Please fill full form!"));
     }
     const isEmail = await User.findOne({ email });
     if (isEmail) {
-        return new ApiError(409, "Email already registered!");
+        return next(new ErrorHandler("Email already registered!"));
     }
     const user = await User.create({
         name,
@@ -20,12 +20,41 @@ export const register = asyncHandler(async (req, res, next) => {
         password,
         role,
     });
-    return res.status(201).json(
-        new ApiResponse(200, user, "User registered Successfully")
-    )
+    sendToken(user, 201, res, "User Registered!");
 });
 
 
+export const login = catchAsyncErrors(async (req, res, next) => {
+    const { email, password, role } = req.body;
+    if (!email || !password || !role) {
+        return next(new ErrorHandler("Please provide emai password and role"))
+    }
+
+    const user = await User.findOne({ email }).select("+passord");
+    if (!user) {
+        return next(new ErrorHandler("Invali Email or Password"))
+    }
+    const isPassword = await User.comparePassword(password);
+    if (!isPassword) {
+        return next(new ErrorHandler("Invalid Email or Password"))
+    }
+    if (user.role !== role) {
+        return next(new ErrorHandler(`User with Provided  email and ${role} Not Found !!`))
+    }
+    sendToken(user, 201, res, "User Logged In!");
+
+})
+
+export const logout = catchAsyncErrors(async (req, res, next) => {
+    res.status(201).cookie("token", "", {
+        httpOnly: true,
+        expires: new Date(Date.now()),
+    })
+        .json({
+            success: true,
+            message: "Logged Out Successfully"
+        });
+})
 
 
 
@@ -42,45 +71,6 @@ export const register = asyncHandler(async (req, res, next) => {
 
 
 
-// export const login = catchAsyncErrors(async (req, res, next) => {
-//   const { email, password, role } = req.body;
-//   if (!email || !password || !role) {
-//     return next(new ErrorHandler("Please provide email ,password and role."));
-//   }
-//   const user = await User.findOne({ email }).select("+password");
-//   if (!user) {
-//     return next(new ErrorHandler("Invalid Email Or Password.", 400));
-//   }
-//   const isPasswordMatched = await user.comparePassword(password);
-//   if (!isPasswordMatched) {
-//     return next(new ErrorHandler("Invalid Email Or Password.", 400));
-//   }
-//   if (user.role !== role) {
-//     return next(
-//       new ErrorHandler(`User with provided email and ${role} not found!`, 404)
-//     );
-//   }
-//   sendToken(user, 201, res, "User Logged In!");
-// });
-
-// export const logout = catchAsyncErrors(async (req, res, next) => {
-//   res
-//     .status(201)
-//     .cookie("token", "", {
-//       httpOnly: true,
-//       expires: new Date(Date.now()),
-//     })
-//     .json({
-//       success: true,
-//       message: "Logged Out Successfully.",
-//     });
-// });
 
 
-// export const getUser = catchAsyncErrors((req, res, next) => {
-//   const user = req.user;
-//   res.status(200).json({
-//     success: true,
-//     user,
-//   });
-// });
+

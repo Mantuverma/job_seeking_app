@@ -11,8 +11,9 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
+        unique: true,
         required: [true, "Please enter your name"],
-        validator: [validator.isEmail, "please provide valid Email"]
+        validate: [validator.isEmail, "please provide valid Email"]
     },
     phone: {
         type: Number,
@@ -54,11 +55,9 @@ userSchema.methods.comparePassword = async function (enterpassword) {
 // generating jwt token when user register
 
 userSchema.methods.getJWTToken = function () {
-    return jwt.sign({ id: this._id },
-        process.env.JWT_SECRET_KEY, {
-        expiresIn: process.env.JWT_EXPIRES
-    })
-
-}
+    return jwt.sign({ id: this._id }, process.env.JWT_SECRET_KEY, {
+        expiresIn: '1d',
+    });
+};
 
 export const User = mongoose.model("User", userSchema);
