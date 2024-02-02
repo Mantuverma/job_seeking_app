@@ -49,8 +49,9 @@ userSchema.pre("save", async function (next) {
 
 // comparing the user password and enter password
 
-userSchema.methods.comparePassword = async function (enterpassword) {
-    return await bcrypt.compare(enterpassword, this.password)
+
+userSchema.methods.comparePassword = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
 };
 // generating jwt token when user register
 

@@ -24,26 +24,28 @@ export const register = catchAsyncErrors(async (req, res, next) => {
 });
 
 
+
 export const login = catchAsyncErrors(async (req, res, next) => {
     const { email, password, role } = req.body;
     if (!email || !password || !role) {
-        return next(new ErrorHandler("Please provide emai password and role"))
+        return next(new ErrorHandler("Please provide email ,password and role."));
     }
-
-    const user = await User.findOne({ email }).select("+passord");
+    const user = await User.findOne({ email }).select("+password");
+    console.log(user)
     if (!user) {
-        return next(new ErrorHandler("Invali Email or Password"))
+        return next(new ErrorHandler("Invalid Email Or Password.", 400));
     }
-    const isPassword = await User.comparePassword(password);
-    if (!isPassword) {
-        return next(new ErrorHandler("Invalid Email or Password"))
+    const isPasswordMatched = await user.comparePassword(password);
+    if (!isPasswordMatched) {
+        return next(new ErrorHandler("Invalid Email Or Password.", 400));
     }
     if (user.role !== role) {
-        return next(new ErrorHandler(`User with Provided  email and ${role} Not Found !!`))
+        return next(
+            new ErrorHandler(`User with provided email and ${role} not found!`, 404)
+        );
     }
     sendToken(user, 201, res, "User Logged In!");
-
-})
+});
 
 export const logout = catchAsyncErrors(async (req, res, next) => {
     res.status(201).cookie("token", "", {
