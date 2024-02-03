@@ -4,6 +4,7 @@ import morgan from "morgan"
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 import userRouter from "./router/userRouter.js"
+import jobRouter from "./router/jobRouters.js"
 const app = express();
 
 app.use(
@@ -25,5 +26,6 @@ app.use(
     })
 )
 app.use("/api/v1/user", userRouter)
+app.use("/api/v1/jobs", jobRouter)
 
 export { app };
