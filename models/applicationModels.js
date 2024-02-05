@@ -28,14 +28,8 @@ const applicationSchema = new mongoose.Schema({
         required: [true, "Please Provide a cover latter"]
     },
     resume: {
-        public_id: {
-            type: String,
-            required: true
-        },
-        url: {
-            type: String,
-            required: true
-        }
+        type: String,
+        required: true
     },
     applicantID: {
         user: {
