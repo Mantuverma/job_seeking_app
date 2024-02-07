@@ -1,20 +1,26 @@
 import express from "express";
-import cors from "cors"
+
 import morgan from "morgan"
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 import userRouter from "./router/userRouter.js"
 import jobRouter from "./router/jobRouters.js"
+import cors from "cors"
 const app = express();
 
-app.use(
-    cors({
-        origin: [process.env.FRONTEND_URL],
-        method: ["GET", "POST", "DELETE", "PUT"],
-        credentials: true,
-    })
-);
+// app.use(
+//     cors({
+//         origin: [process.env.FRONTEND_URL],
+//         method: ["GET", "POST", "DELETE", "PUT"],
+//         credentials: true,
+//     })
+// );
 
+
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true
+}))
 app.use(cookieParser());
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));

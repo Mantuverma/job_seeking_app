@@ -1,11 +1,13 @@
 import connectDB from "./database/dbConnection.js";
 import { app } from "./app.js";
 import { DB_NAME } from "./utils/constant.js"
-
+import cors from "cors"
 import dotenv from "dotenv"
 dotenv.config({
     path: './.env'
 })
+
+app.use(cors())
 
 connectDB()
     .then(() => {
